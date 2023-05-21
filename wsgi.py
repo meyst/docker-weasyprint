@@ -71,8 +71,9 @@ def generate():
     name = request.args.get('filename', 'unnamed.pdf')
     app.logger.info('POST  /pdf?filename=%s' % name)
     app.logger.info('html = %s' % request.form['html'])
+    app.logger.info('css = %s' % request.form['css'])
     html = HTML(string=request.form['html'])
-    css = [CSS(string=request.form['css'])]
+    css = CSS(string=request.form['css'])
     pdf = html.write_pdf(stylesheets=css)
     response = make_response(pdf)
     response.headers['Content-Type'] = 'application/pdf'
