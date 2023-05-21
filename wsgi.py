@@ -5,7 +5,7 @@ import os
 import logging
 from functools import wraps
 
-from flask import Flask, request, make_response, abort
+from flask import Flask, request, make_response, abort, render_template
 from weasyprint import HTML, CSS
 
 app = Flask('pdf')
@@ -70,14 +70,10 @@ def home():
 def generate():
     name = request.args.get('filename', 'unnamed.pdf')
     app.logger.info('POST  /pdf?filename=%s' % name)
-    if request.headers['Content-Type'] == 'application/json':
-        data = json.loads(request.data.decode('utf-8'))
-        html = HTML(string=data['html'])
-        css = [CSS(string=sheet) for sheet in data['css']]
+    if request.method == "POST":
+        html = HTML(string=request.form['html'])
+        css = [CSS(string=request.form['css'])
         pdf = html.write_pdf(stylesheets=css)
-    else:
-        html = HTML(string=request.data.decode('utf-8'))
-        pdf = html.write_pdf()
     response = make_response(pdf)
     response.headers['Content-Type'] = 'application/pdf'
     response.headers['Content-Disposition'] = 'inline;filename=%s' % name
