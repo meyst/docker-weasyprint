@@ -72,12 +72,9 @@ def generate():
     app.logger.info('POST  /pdf?filename=%s' % name)
     app.logger.info('html = %s' % request.form['html'])
     app.logger.info('css = %s' % request.form['css'])
-    html_content = render_template_string('''
-    <html>
-    <h1>Hallo {{name}}<h1>
-    ''',name="Stephan")
+    html_content = render_template_string(request.form['html'],name="Stephan")
     font_config = FontConfiguration()
-    html = HTML(html_content)
+    html = HTML(string=html_content)
     css = CSS(string=request.form['css'])
     pdf = html.write_pdf(stylesheets=[css],font_config=font_config)
     response = make_response(pdf)
