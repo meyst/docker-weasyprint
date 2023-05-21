@@ -72,7 +72,7 @@ def generate():
     app.logger.info('POST  /pdf?filename=%s' % name)
     if request.method == "POST":
         html = HTML(string=request.form['html'])
-        css = [CSS(string=request.form['css'])
+        css = [CSS(string=request.form['css'])]
         pdf = html.write_pdf(stylesheets=css)
     response = make_response(pdf)
     response.headers['Content-Type'] = 'application/pdf'
