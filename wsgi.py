@@ -5,7 +5,7 @@ import os
 import logging
 from functools import wraps
 
-from flask import Flask, request, make_response, abort, render_template, render_template_string, send_from_directory
+from flask import Flask, request, make_response, abort, render_template, render_template_string, send_from_directory, url_for
 from weasyprint import HTML, CSS
 from weasyprint.text.fonts import FontConfiguration
 
