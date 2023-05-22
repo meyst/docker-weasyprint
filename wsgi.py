@@ -163,7 +163,9 @@ def save_upload():
     files = request.files.getlist("file")
     # print(files)
     for f in files:
+        app.logger.info("File upload, Name %s" % f.filename)
         filename = secure_filename(f.filename)
+        app.logger.info("File upload, Secure Filename %s" % filename)
         f.save(app.config["UPLOAD_FOLDER"] + filename)
     return "UPLOAD OK"
 
