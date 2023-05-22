@@ -19,6 +19,7 @@ BASE64_DATA_RE = re.compile('^data:[^;]+;base64,')
 def get_blocked_url_pattern():
     return get("BLOCKED_URL_PATTERN", "^.*$")
 
+
 def get(key, default=None):
     return os.environ.get(key) or default
 
