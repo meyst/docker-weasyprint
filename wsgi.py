@@ -167,7 +167,7 @@ def send_media(path):
     """
 
     return send_from_directory(
-        directory=app.config['UPLOAD_FOLDER'], path=path
+        directory="/usr/src/uploads", path=path
     )
 
 @app.route("/upload", methods = ["POST"])
