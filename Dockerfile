@@ -11,7 +11,7 @@ COPY requirements.txt ./
 
 
 
-COPY static  /usr/src/app/
+COPY static  /usr/src/app/static
 
 RUN pip install --no-cache-dir -r requirements.txt
 
