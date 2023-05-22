@@ -7,6 +7,7 @@ import os
 import logging
 import mimetypes
 from functools import wraps
+from jinja2 import Template
 
 from flask import Flask, request, make_response, abort, render_template, render_template_string, send_from_directory, url_for
 from werkzeug.utils import secure_filename
@@ -83,7 +84,9 @@ def generate():
     payload = request.form['payload']
     #app.logger.info('POST  /pdf?filename=%s' % name)
     #app.logger.info('css = %s' % request.form['css'])
-    html_content = render_template_string(request.form['html'],json.loads(payload))
+    
+    #html_content = render_template_string(request.form['html'],json.loads(payload))
+    html_content = Template(request.form['html']).render(json.loads(payload))
     #app.logger.info('html_content = %s' % html_content)
     app.logger.info("OS get cwd: %s" % os.getcwd())
     font_config = FontConfiguration()
