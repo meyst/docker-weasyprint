@@ -73,7 +73,7 @@ def generate():
     html_content = render_template_string(request.form['html'],name="Stephan")
     app.logger.info('html_content = %s' % html_content)
     font_config = FontConfiguration()
-    html = HTML(string=html_content, base_url=".")
+    html = HTML(string=html_content, base_url=os.getcwd())
     css = CSS(string=request.form['css'])
     pdf = html.write_pdf(stylesheets=[css],font_config=font_config)
     response = make_response(pdf)
