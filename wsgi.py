@@ -69,9 +69,9 @@ def home():
 def generate():
     name = request.args.get('filename', 'unnamed.pdf')
     app.logger.info('POST  /pdf?filename=%s' % name)
-    app.logger.info('html = %s' % request.form['html'])
     app.logger.info('css = %s' % request.form['css'])
     html_content = render_template_string(request.form['html'],name="Stephan")
+    app.logger.info('html_content = %s' % html_content)
     font_config = FontConfiguration()
     html = HTML(string=html_content)
     css = CSS(string=request.form['css'])
