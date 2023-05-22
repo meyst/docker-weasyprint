@@ -1,13 +1,79 @@
 #!/usr/bin/env python
 
 import json
+import re
 import os
 import logging
+import mimetypes
 from functools import wraps
 
 from flask import Flask, request, make_response, abort, render_template, render_template_string, send_from_directory, url_for
-from weasyprint import HTML, CSS
+from weasyprint import HTML, CSS, default_url_fetcher
 from weasyprint.text.fonts import FontConfiguration
+
+UNICODE_SCHEME_RE = re.compile('^([a-zA-Z][a-zA-Z0-9.+-]+):')
+BASE64_DATA_RE = re.compile('^data:[^;]+;base64,')
+def get_blocked_url_pattern():
+    return get("BLOCKED_URL_PATTERN", "^.*$")
+
+def get(key, default=None):
+    return os.environ.get(key) or default
+
+def get_allowed_url_pattern():
+    return get("ALLOWED_URL_PATTERN", "^$")
+
+def check_url_access(url):
+    allowed_url_pattern = get_allowed_url_pattern()
+    blocked_url_pattern = get_blocked_url_pattern()
+
+    try:
+        if re.match(allowed_url_pattern, url):
+            return True
+        if re.match(blocked_url_pattern, url):
+            return False
+        return True  # pragma: no cover
+    except Exception:  # pragma: no cover
+        logging.error(
+            "Could not parse one of the URL Patterns correctly. Therefor the URL %r was " +
+            "blocked. Please check your configuration." % url
+        )
+        return False
+    
+def url_fetcher(url):
+    if not UNICODE_SCHEME_RE.match(url):  # pragma: no cover
+        raise ValueError('Not an absolute URI: %r' % url)
+
+    if url.startswith('file://'):
+        return _resolve_file(url.split('?')[0])
+
+    if not check_url_access(url) and not BASE64_DATA_RE.match(url):
+        raise PermissionError('Requested URL %r was blocked because of restircion definitions.' % url)
+
+    fetch_result = default_url_fetcher(url)
+    if fetch_result["mime_type"] == "text/plain":
+        fetch_result["mime_type"] = mimetypes.guess_type(url)[0]
+
+    return fetch_result
+
+def _resolve_file(url):
+        abs_file_path = re.sub("^file://", "", url)
+        file_path = os.path.relpath(abs_file_path, os.getcwd())
+
+        file = None
+
+        if file is None:  # pragma: no cover
+            raise FileNotFoundError('File %r was not found.' % file_path)
+
+        mimetype = file.mimetype
+        if mimetype in ["application/octet-stream", "text/plain"]:
+            mimetype = mimetypes.guess_type(file_path)[0]
+
+        return {
+            'mime_type': mimetype,
+            'file_obj': NonClosable(file),
+            'filename': file_path
+        }
+
 
 app = Flask('pdf')
 
@@ -100,3 +166,25 @@ def multiple():
 
 if __name__ == '__main__':
     app.run()
+
+
+class NonClosable:
+    def __init__(self, stream_like):
+        self.stream_like = stream_like
+
+    def close(self):
+        # Reset file instead of closing it
+        if hasattr(self.stream_like, "seek"):
+            self.stream_like.seek(0)
+
+    def __bool__(self):
+        return self.stream_like.__bool__()
+
+    def __getattr__(self, name):
+        return getattr(self.stream_like, name)
+
+    def __iter__(self):
+        return self.stream_like.__iter__()
+
+    def __repr__(self):
+        return self.stream_like.__repr__()
