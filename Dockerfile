@@ -9,11 +9,12 @@ RUN apt-get -y update \
 WORKDIR /usr/src/app
 
 COPY requirements.txt ./
+ADD static  /var/data/static
 
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY wsgi.py ./
-COPY static /var/data
+
 
 EXPOSE 5001
 
