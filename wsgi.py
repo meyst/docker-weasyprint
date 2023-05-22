@@ -13,6 +13,8 @@ from weasyprint.text.fonts import FontConfiguration
 
 UNICODE_SCHEME_RE = re.compile('^([a-zA-Z][a-zA-Z0-9.+-]+):')
 BASE64_DATA_RE = re.compile('^data:[^;]+;base64,')
+
+
 def get_blocked_url_pattern():
     return get("BLOCKED_URL_PATTERN", "^.*$")
 
@@ -74,6 +76,16 @@ def _resolve_file(url):
             'filename': file_path
         }
 
+logging.addLevelName(logging.DEBUG, "\033[1;36m%s\033[1;0m" % logging.getLevelName(logging.DEBUG))
+logging.addLevelName(logging.INFO, "\033[1;32m%s\033[1;0m" % logging.getLevelName(logging.INFO))
+logging.addLevelName(logging.WARNING, "\033[1;33m%s\033[1;0m" % logging.getLevelName(logging.WARNING))
+logging.addLevelName(logging.ERROR, "\033[1;31m%s\033[1;0m" % logging.getLevelName(logging.ERROR))
+
+handler = logging.StreamHandler()
+handler.setFormatter(logging.Formatter(
+    '%(asctime)s %(levelname)s: %(message)s '
+    '[in %(pathname)s:%(lineno)d]'
+))
 
 app = Flask('pdf')
 
@@ -107,11 +119,7 @@ with app.app_context():
     logging.addLevelName(logging.WARNING, "\033[1;33m%s\033[1;0m" % logging.getLevelName(logging.WARNING))
     logging.addLevelName(logging.ERROR, "\033[1;31m%s\033[1;0m" % logging.getLevelName(logging.ERROR))
 
-    handler = logging.StreamHandler()
-    handler.setFormatter(logging.Formatter(
-        '%(asctime)s %(levelname)s: %(message)s '
-        '[in %(pathname)s:%(lineno)d]'
-    ))
+    
     app.logger.addHandler(handler)
     app.logger.setLevel(logging.DEBUG)
 
