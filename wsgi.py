@@ -63,9 +63,6 @@ def home():
                     be rendered and combined into a single pdf</li>
             </ul>
         '''
-@app.route('/media/<path:path>')
-def serve_static(path):
-    return send_from_directory('/var/data/', path)
 
 @app.route('/pdf', methods=['POST'])
 @authenticate
