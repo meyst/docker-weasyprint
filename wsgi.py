@@ -160,6 +160,15 @@ def generate():
     app.logger.info(' ==> POST  /pdf?filename=%s  ok' % name)
     return response
 
+@app.get('/media/<path:path>')
+def send_media(path):
+    """
+    :param path: a path like "posts/<int:post_id>/<filename>"
+    """
+
+    return send_from_directory(
+        directory=app.config['UPLOAD_FOLDER'], path=path
+    )
 
 @app.route("/upload", methods = ["POST"])
 def save_upload():
