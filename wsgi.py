@@ -14,72 +14,6 @@ from werkzeug.datastructures import FileStorage
 from weasyprint import HTML, CSS, default_url_fetcher
 from weasyprint.text.fonts import FontConfiguration
 
-UNICODE_SCHEME_RE = re.compile('^([a-zA-Z][a-zA-Z0-9.+-]+):')
-BASE64_DATA_RE = re.compile('^data:[^;]+;base64,')
-
-
-def get_blocked_url_pattern():
-    return get("BLOCKED_URL_PATTERN", "^.*$")
-
-
-def get(key, default=None):
-    return os.environ.get(key) or default
-
-def get_allowed_url_pattern():
-    return get("ALLOWED_URL_PATTERN", "^$")
-
-def check_url_access(url):
-    allowed_url_pattern = get_allowed_url_pattern()
-    blocked_url_pattern = get_blocked_url_pattern()
-
-    try:
-        if re.match(allowed_url_pattern, url):
-            return True
-        if re.match(blocked_url_pattern, url):
-            return False
-        return True  # pragma: no cover
-    except Exception:  # pragma: no cover
-        logging.error(
-            "Could not parse one of the URL Patterns correctly. Therefor the URL %r was " +
-            "blocked. Please check your configuration." % url
-        )
-        return False
-    
-def url_fetcher(url):
-    if not UNICODE_SCHEME_RE.match(url):  # pragma: no cover
-        raise ValueError('Not an absolute URI: %r' % url)
-
-    if url.startswith('file://'):
-        return _resolve_file(url.split('?')[0])
-
-    if not check_url_access(url) and not BASE64_DATA_RE.match(url):
-        raise PermissionError('Requested URL %r was blocked because of restircion definitions.' % url)
-
-    fetch_result = default_url_fetcher(url)
-    if fetch_result["mime_type"] == "text/plain":
-        fetch_result["mime_type"] = mimetypes.guess_type(url)[0]
-
-    return fetch_result
-
-def _resolve_file(url):
-        abs_file_path = re.sub("^file://", "", url)
-        file_path = os.path.relpath(abs_file_path, os.getcwd())
-
-        file = None
-
-        if file is None:  # pragma: no cover
-            raise FileNotFoundError('File %r was not found.' % file_path)
-
-        mimetype = file.mimetype
-        if mimetype in ["application/octet-stream", "text/plain"]:
-            mimetype = mimetypes.guess_type(file_path)[0]
-
-        return {
-            'mime_type': mimetype,
-            'file_obj': NonClosable(file),
-            'filename': file_path
-        }
-
 logging.addLevelName(logging.DEBUG, "\033[1;36m%s\033[1;0m" % logging.getLevelName(logging.DEBUG))
 logging.addLevelName(logging.INFO, "\033[1;32m%s\033[1;0m" % logging.getLevelName(logging.INFO))
 logging.addLevelName(logging.WARNING, "\033[1;33m%s\033[1;0m" % logging.getLevelName(logging.WARNING))
@@ -146,10 +80,12 @@ def home():
 @authenticate
 def generate():
     name = request.args.get('filename', 'unnamed.pdf')
+    payload = request.form['payload']
     #app.logger.info('POST  /pdf?filename=%s' % name)
     #app.logger.info('css = %s' % request.form['css'])
-    html_content = render_template_string(request.form['html'],name="Stephan")
+    html_content = render_template_string(request.form['html'],json.loads(payload))
     #app.logger.info('html_content = %s' % html_content)
+    app.logger.info("OS get cwd: %s" % os.getcwd())
     font_config = FontConfiguration()
     html = HTML(string=html_content, base_url=os.getcwd())
     css = CSS(string=request.form['css'])
