@@ -163,6 +163,9 @@ def generate():
 def save_upload():
     data = request.get_data()
     app.logger.info("length of input data: {}".format(len(data)))
+    app.logger.info("content_type of input data: %s" % request.content_type)
+    app.logger.info("filename of input data: %s" % request.filename)
+
     files = request.files.getlist("file")
     # print(files)
     for f in files:
