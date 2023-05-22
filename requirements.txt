@@ -1,3 +1,4 @@
 gunicorn
 WeasyPrint
 flask
+werkzeug

@@ -8,6 +8,7 @@ import mimetypes
 from functools import wraps
 
 from flask import Flask, request, make_response, abort, render_template, render_template_string, send_from_directory, url_for
+from werkzeug.utils import secure_filename
 from weasyprint import HTML, CSS, default_url_fetcher
 from weasyprint.text.fonts import FontConfiguration
 
@@ -88,7 +89,7 @@ handler.setFormatter(logging.Formatter(
 ))
 
 app = Flask('pdf')
-
+app.config["UPLOAD_FOLDER"] = "uploads/"
 
 def authenticate(f):
     @wraps(f)
@@ -157,19 +158,14 @@ def generate():
     return response
 
 
-@app.route('/multiple', methods=['POST'])
-@authenticate
-def multiple():
-    name = request.args.get('filename', 'unnamed.pdf')
-    app.logger.info('POST  /multiple?filename=%s' % name)
-    htmls = json.loads(request.data.decode('utf-8'))
-    documents = [HTML(string=html, base_url="").render() for html in htmls]
-    pdf = documents[0].copy([page for doc in documents for page in doc.pages]).write_pdf()
-    response = make_response(pdf)
-    response.headers['Content-Type'] = 'application/pdf'
-    response.headers['Content-Disposition'] = 'inline;filename=%s' % name
-    app.logger.info(' ==> POST  /multiple?filename=%s  ok' % name)
-    return response
+@app.route("/upload", methods = ["POST"])
+def save_upload():
+    files = request.files.getlist("file")
+    # print(files)
+    for f in files:
+        filename = secure_filename(f.filename)
+        f.save(app.config["UPLOAD_FOLDER"] + filename)
+    return "UPLOAD OK"
 
 
 if __name__ == '__main__':
