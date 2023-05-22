@@ -9,7 +9,9 @@ RUN apt-get -y update \
 WORKDIR /usr/src/app
 COPY requirements.txt ./
 
-COPY static/  ./
+
+
+COPY static  .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
