@@ -144,10 +144,10 @@ def home():
 @authenticate
 def generate():
     name = request.args.get('filename', 'unnamed.pdf')
-    app.logger.info('POST  /pdf?filename=%s' % name)
-    app.logger.info('css = %s' % request.form['css'])
+    #app.logger.info('POST  /pdf?filename=%s' % name)
+    #app.logger.info('css = %s' % request.form['css'])
     html_content = render_template_string(request.form['html'],name="Stephan")
-    app.logger.info('html_content = %s' % html_content)
+    #app.logger.info('html_content = %s' % html_content)
     font_config = FontConfiguration()
     html = HTML(string=html_content, base_url=os.getcwd())
     css = CSS(string=request.form['css'])
@@ -163,8 +163,8 @@ def generate():
 def save_upload():
     data = request.get_data()
     app.logger.info("length of input data: {}".format(len(data)))
-    app.logger.info("Filename: %s" % request.form.get('filename'))
-    app.logger.info("Content type: %s" % request.form.get('content_type'))
+    app.logger.info("Filename: %s" % data.filename)
+    app.logger.info("Content type: %s" % data.content_type)
 
     files = request.files.getlist("file")
     # print(files)
