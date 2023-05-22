@@ -5,7 +5,7 @@ import os
 import logging
 from functools import wraps
 
-from flask import Flask, request, make_response, abort, render_template, render_template_string
+from flask import Flask, request, make_response, abort, render_template, render_template_string, send_from_directory
 from weasyprint import HTML, CSS
 from weasyprint.text.fonts import FontConfiguration
 
@@ -63,7 +63,9 @@ def home():
                     be rendered and combined into a single pdf</li>
             </ul>
         '''
-
+@app.route('/media/<path:path>')
+def serve_static(path):
+    return send_from_directory('/var/data/', path)
 
 @app.route('/pdf', methods=['POST'])
 @authenticate
