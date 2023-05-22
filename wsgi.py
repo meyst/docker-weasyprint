@@ -165,9 +165,9 @@ def send_media(path):
     """
     :param path: a path like "posts/<int:post_id>/<filename>"
     """
-
+    app.logger.info("Media Path: %s" % path)
     return send_from_directory(
-        directory="/usr/src/uploads", path=path
+        directory="/usr/src/app/uploads", path=path
     )
 
 @app.route("/upload", methods = ["POST"])
