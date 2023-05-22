@@ -92,7 +92,7 @@ handler.setFormatter(logging.Formatter(
 ))
 
 app = Flask('pdf')
-app.config["UPLOAD_FOLDER"] = "uploads/"
+app.config["UPLOAD_FOLDER"] = "/usr/src/app/uploads/"
 
 def authenticate(f):
     @wraps(f)
@@ -167,7 +167,7 @@ def send_media(path):
     """
     app.logger.info("Media Path: %s" % path)
     return send_from_directory(
-        directory="/app/uploads", path=path
+        directory="/usr/src/app/uploads", path=path
     )
 
 @app.route("/upload", methods = ["POST"])
