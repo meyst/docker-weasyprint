@@ -161,7 +161,8 @@ def generate():
 
 @app.route("/upload", methods = ["POST"])
 def save_upload():
-    app.logger.info("DEBUG SN Attachment: %s" % request.content_type)
+    data = request.get_data()
+    app.logger.info("length of input data: {}".format(len(data)))
     files = request.files.getlist("file")
     # print(files)
     for f in files:
