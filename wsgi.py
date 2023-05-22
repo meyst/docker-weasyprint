@@ -141,7 +141,7 @@ def generate():
     font_config = FontConfiguration()
     html = HTML(string=html_content, base_url=os.getcwd())
     css = CSS(string=request.form['css'])
-    pdf = html.write_pdf(stylesheets=[css],font_config=font_config)
+    pdf = html.write_pdf(stylesheets=[css],url_fetcher=url_fetcher(),font_config=font_config)
     response = make_response(pdf)
     response.headers['Content-Type'] = 'application/pdf'
     response.headers['Content-Disposition'] = 'inline;filename=%s' % name
