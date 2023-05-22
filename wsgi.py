@@ -2,6 +2,7 @@
 
 import json
 import re
+import io
 import os
 import logging
 import mimetypes
@@ -9,6 +10,7 @@ from functools import wraps
 
 from flask import Flask, request, make_response, abort, render_template, render_template_string, send_from_directory, url_for
 from werkzeug.utils import secure_filename
+from werkzeug.datastructures import FileStorage
 from weasyprint import HTML, CSS, default_url_fetcher
 from weasyprint.text.fonts import FontConfiguration
 
@@ -161,18 +163,15 @@ def generate():
 
 @app.route("/upload", methods = ["POST"])
 def save_upload():
+    filename = request.headers["filename"]
+    content_type = request.headers["content_type"]
     data = request.get_data()
+    stream = io.BytesIO(data)
+    file = FileStorage( stream=stream, content_type=content_type, filename=filename)
+    file.save(app.config["UPLOAD_FOLDER"] + filename)
     app.logger.info("length of input data: {}".format(len(data)))
-    app.logger.info("Filename: %s" % request.headers["filename"])
-    app.logger.info("Content type: %s" % request.headers["content_type"])
-
-    files = request.files.getlist("file")
-    # print(files)
-    for f in files:
-        app.logger.info("File upload, Name %s" % f.filename)
-        filename = secure_filename(f.filename)
-        app.logger.info("File upload, Secure Filename %s" % filename)
-        f.save(app.config["UPLOAD_FOLDER"] + filename)
+    app.logger.info("Filename: %s" % filename)
+    app.logger.info("Content type: %s" % content_type)
     return "UPLOAD OK"
 
 
